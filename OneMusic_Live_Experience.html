@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Music | Ultra-Premium Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FA243C;
+            --bg: #000000;
+            --surface: #1C1C1E;
+            --text: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Phone Frame */
+        .phone {
+            width: 375px;
+            height: 812px;
+            background: var(--bg);
+            border: 8px solid #333;
+            border-radius: 50px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Dynamic Background Blur */
+        .blur-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            filter: blur(80px) brightness(0.5);
+            z-index: 0;
+            transition: background 0.8s ease;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        header {
+            padding: 60px 24px 20px;
+        }
+
+        .label {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        /* Trending Section */
+        .section-title {
+            padding: 0 24px;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 30px 0 15px;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 24px;
+            scrollbar-width: none;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+
+        .card {
+            min-width: 160px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card:active { transform: scale(0.92); }
+
+        .card img {
+            width: 160px;
+            height: 160px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .card-artist {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Mini Player */
+        .mini-player {
+            position: absolute;
+            bottom: 20px;
+            left: 12px;
+            right: 12px;
+            height: 64px;
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .mini-art {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .mini-info {
+            flex: 1;
+        }
+
+        .mini-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .mini-controls {
+            display: flex;
+            gap: 20px;
+            font-size: 24px;
+        }
+
+        /* Full Player Overlay */
+        .player-overlay {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--surface);
+            z-index: 10;
+            transition: top 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 60px 32px;
+            align-items: center;
+        }
+
+        .player-overlay.expanded {
+            top: 0;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .close-handle {
+            width: 40px;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .full-art {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .playing .full-art {
+            transform: scale(1.05);
+        }
+
+        .full-info {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .full-title {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .full-artist {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--text-secondary);
+            width: 0%;
+            border-radius: 10px;
+        }
+
+        .controls-main {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            font-size: 40px;
+        }
+
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 60px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        .logo-large {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone" id="appContainer">
+        <!-- Loading State -->
+        <div class="loading-overlay" id="loader">
+            <img src="https://img.icons8.com/ios-filled/100/fa243c/apple-music.png" class="logo-large">
+            <p style="font-weight: 600; letter-spacing: 2px;">ONE MUSIC</p>
+        </div>
+
+        <div class="blur-bg" id="blurBg"></div>
+
+        <div class="content">
+            <header>
+                <div class="label">Your Music</div>
+                <h1>Listen Now</h1>
+            </header>
+
+            <p class="section-title">Trending Now</p>
+            <div class="horizontal-scroll" id="trendingList">
+                <!-- Trending cards will be injected -->
+            </div>
+
+            <p class="section-title">Recently Played</p>
+            <div class="horizontal-scroll" id="recentList">
+                <!-- Recent cards will be injected -->
+            </div>
+        </div>
+
+        <!-- Mini Player -->
+        <div class="mini-player" id="miniPlayer" onclick="expandPlayer()">
+            <img src="" class="mini-art" id="miniArt">
+            <div class="mini-info">
+                <div class="mini-title" id="miniTitle">Not Playing</div>
+                <div class="mini-artist" id="miniArtist" style="font-size: 12px;">Select a song</div>
+            </div>
+            <div class="mini-controls">
+                <span onclick="event.stopPropagation(); togglePlay()">▶</span>
+            </div>
+        </div>
+
+        <!-- Full Player Overlay -->
+        <div class="player-overlay" id="fullPlayer">
+            <div class="close-handle" onclick="minimizePlayer()"></div>
+            <img src="" class="full-art" id="fullArt">
+            <div class="full-info">
+                <div class="full-title" id="fullTitle">Song Title</div>
+                <div class="full-artist" id="fullArtist">Artist Name</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="controls-main">
+                <span style="font-size: 30px; opacity: 0.5;">⏮</span>
+                <button class="play-btn" onclick="togglePlay()" id="mainPlayBtn">▶</button>
+                <span style="font-size: 30px; opacity: 0.5;">⏭</span>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioEngine"></audio>
+
+    <script>
+        const songs = [
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", art: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=400", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+            { id: 2, title: "Starboy", artist: "The Weeknd", art: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=400", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+            { id: 3, title: "Levitating", artist: "Dua Lipa", art: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=400", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+            { id: 4, title: "Circles", artist: "Post Malone", art: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=400", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" }
+        ];
+
+        let currentSong = null;
+        let isPlaying = false;
+
+        const audioEngine = document.getElementById('audioEngine');
+        const loader = document.getElementById('loader');
+
+        // Initialize Lists
+        function init() {
+            const trendingList = document.getElementById('trendingList');
+            const recentList = document.getElementById('recentList');
+
+            songs.forEach(song => {
+                const card = createCard(song);
+                trendingList.appendChild(card);
+                recentList.appendChild(createCard(song));
+            });
+
+            // Simulate loading
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }, 2000);
+        }
+
+        function createCard(song) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <img src="${song.art}">
+                <div class="card-title">${song.title}</div>
+                <div class="card-artist">${song.artist}</div>
+            `;
+            div.onclick = () => selectSong(song);
+            return div;
+        }
+
+        function selectSong(song) {
+            currentSong = song;
+            document.getElementById('miniTitle').innerText = song.title;
+            document.getElementById('miniArtist').innerText = song.artist;
+            document.getElementById('miniArt').src = song.art;
+            
+            document.getElementById('fullTitle').innerText = song.title;
+            document.getElementById('fullArtist').innerText = song.artist;
+            document.getElementById('fullArt').src = song.art;
+            document.getElementById('blurBg').style.backgroundImage = `url(${song.art})`;
+
+            audioEngine.src = song.url;
+            play();
+        }
+
+        function togglePlay() {
+            if (!currentSong) return;
+            if (isPlaying) pause();
+            else play();
+        }
+
+        function play() {
+            audioEngine.play();
+            isPlaying = true;
+            document.getElementById('mainPlayBtn').innerText = '⏸';
+            document.getElementById('fullPlayer').classList.add('playing');
+        }
+
+        function pause() {
+            audioEngine.pause();
+            isPlaying = false;
+            document.getElementById('mainPlayBtn').innerText = '▶';
+            document.getElementById('fullPlayer').classList.remove('playing');
+        }
+
+        function expandPlayer() {
+            if (!currentSong) return;
+            document.getElementById('fullPlayer').classList.add('expanded');
+        }
+
+        function minimizePlayer() {
+            document.getElementById('fullPlayer').classList.remove('expanded');
+        }
+
+        // Progress Bar
+        audioEngine.ontimeupdate = () => {
+            const percent = (audioEngine.currentTime / audioEngine.duration) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+        };
+
+        init();
+    </script>
+</body>
+</html>
